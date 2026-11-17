@@ -162,20 +162,19 @@
 
       <figure class="figure">
       <div class="figure-head">
-        <strong>Fig. 1 — Behavioural repertoire under runtime instability</strong>
-        <span class="label">n = 390 agent-runs</span>
+        <strong>Fig. 1 — How many distinct behaviours each agent used</strong>
+        <span class="label">n = 390 agent-runs · 13 sessions</span>
       </div>
       <div class="figure-body">
-        <svg id="trace" viewBox="0 0 640 250" role="img" aria-label="Line chart: Utility AI agents expand their range of distinct actions after each glitch event, while the finite state machine baseline stays flat.">
+        <svg id="trace" viewBox="0 0 640 260" role="img" aria-label="Grouped bar chart of agent-runs by number of distinct behaviours used. FSM: 12 runs used 2, 45 used 3, 108 used 4, 30 used 5, none used 6 or 7. Utility AI: 6 used 2, 46 used 3, 81 used 4, 48 used 5, 13 used 6, 1 used 7.">
           <g id="gfx"></g>
         </svg>
       </div>
       <div class="key">
-        <span><i style="background:var(--signal)"></i>Utility AI</span>
-        <span><i style="background:var(--baseline)"></i>FSM baseline</span>
-        <span><i style="background:transparent;border-top:1.5px dashed var(--line)"></i>Glitch event</span>
+        <span><i style="background:var(--baseline)"></i>FSM baseline (195 runs)</span>
+        <span><i style="background:var(--signal)"></i>Utility AI (195 runs)</span>
       </div>
-      <figcaption class="caption">An illustrative sketch of the finding from my MSc dissertation (not plotted point by point from the CSVs). Thirty enemy agents share identical bodies and differ only in how they decide. Each dashed line is a scripted failure of the game world. The utility-driven agents keep finding new actions; the state machine keeps doing what it always did.</figcaption>
+      <figcaption class="caption">Real data from the 13 final experiment sessions. Each agent-run is one enemy across one session; behaviours are counted from the per-second telemetry, with matching FSM states and utility actions treated as the same behaviour and death excluded. Utility agents used five or more behaviours in 62 runs against 30 for the FSM, and reached seven where the FSM topped out at five (Mann–Whitney U, one-sided, p = 0.002).</figcaption>
     </figure>
 
     </div>
@@ -307,108 +306,50 @@
     </div>
     <div class="colophon">
       <span class="label">© 2026 Utsav Jivani</span>
-      <span class="label">Fig. 1 is an illustrative sketch of the dissertation result</span>
+      <span class="label">Fig. 1 plots real session data</span>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  var NS="http://www.w3.org/2000/svg";
-  var g=document.getElementById("gfx");
-  var L=54, R=616, T=22, B=206;           // plot box
+  var NS="http://www.w3.org/2000/svg", g=document.getElementById("gfx");
+  var L=56,R=620,T=18,B=206, MAX=120;
+  var cats=[2,3,4,5,6,7];
+  var util=[6,46,81,48,13,1], fsm=[12,45,108,30,0,0];
   var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  var events=[
-    {t:0.16,name:"Gravity flip"},
-    {t:0.33,name:"Wall vanish"},
-    {t:0.50,name:"Enemy dupe"},
-    {t:0.67,name:"Time stutter"},
-    {t:0.84,name:"Player dupe"}
-  ];
-
   function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
-  function x(t){return L+t*(R-L);}
-  function y(v){return B-(v/9)*(B-T);}   // 0..9 distinct actions
-
-  // horizontal gridlines
-  [0,3,6,9].forEach(function(v){
-    g.appendChild(el("line",{x1:L,y1:y(v),x2:R,y2:y(v),style:"stroke:var(--line)","stroke-width":v===0?0:1,opacity:.5}));
+  function y(v){return B-(v/MAX)*(B-T);}
+  [0,40,80,120].forEach(function(v){
+    g.appendChild(el("line",{x1:L,y1:y(v),x2:R,y2:y(v),style:"stroke:var(--line)","stroke-width":v===0?0:1,opacity:.6}));
     g.appendChild(el("text",{x:L-10,y:y(v)+2.6,"text-anchor":"end",class:"axlab"})).textContent=v;
   });
   g.appendChild(el("line",{x1:L,y1:B,x2:R,y2:B,class:"axis"}));
-  g.appendChild(el("line",{x1:L,y1:T,x2:L,y2:B,class:"axis"}));
-
-  var yl=el("text",{x:0,y:0,class:"axlab",transform:"translate(16,"+((T+B)/2)+") rotate(-90)","text-anchor":"middle"});
-  yl.textContent="Distinct actions used"; g.appendChild(yl);
-  var xl=el("text",{x:(L+R)/2,y:B+34,class:"axlab","text-anchor":"middle"});
-  xl.textContent="Session time \u2192"; g.appendChild(xl);
-
-  // event markers
-  var marks=[];
-  events.forEach(function(ev){
-    var gx=x(ev.t);
-    var ln=el("line",{x1:gx,y1:T-6,x2:gx,y2:B,class:"dash",opacity:0});
-    var tx=el("text",{x:gx+4,y:T-1,class:"evt",opacity:0});
-    tx.textContent=ev.name;
-    g.appendChild(ln); g.appendChild(tx);
-    marks.push({t:ev.t,ln:ln,tx:tx});
+  var yl=el("text",{class:"axlab",transform:"translate(16,"+((T+B)/2)+") rotate(-90)","text-anchor":"middle"});
+  yl.textContent="Agent-runs"; g.appendChild(yl);
+  var xl=el("text",{x:(L+R)/2,y:B+44,class:"axlab","text-anchor":"middle"});
+  xl.textContent="Distinct behaviours used in a session"; g.appendChild(xl);
+  var band=(R-L)/cats.length, bw=band*0.3, bars=[];
+  cats.forEach(function(c,i){
+    var cx=L+band*i+band/2;
+    g.appendChild(el("text",{x:cx,y:B+18,"text-anchor":"middle",class:"axlab"})).textContent=c;
+    [[fsm[i],"var(--baseline)",cx-bw-2],[util[i],"var(--signal)",cx+2]].forEach(function(s){
+      var h=B-y(s[0]);
+      var r=el("rect",{x:s[2],y:B,width:bw,height:0,style:"fill:"+s[1]});
+      g.appendChild(r);
+      var t=el("text",{x:s[2]+bw/2,y:y(s[0])-5,"text-anchor":"middle",class:"axlab",opacity:0});
+      t.textContent=s[0]; g.appendChild(t);
+      bars.push({r:r,t:t,h:h});
+    });
   });
-
-  // series: utility steps up at each event, FSM stays flat with tiny noise
-  function build(fn){
-    var d="",n=140;
-    for(var i=0;i<=n;i++){
-      var t=i/n;
-      d+=(i?" L":"M")+x(t).toFixed(2)+" "+y(fn(t)).toFixed(2);
-    }
-    return d;
-  }
-  function util(t){
-    var v=1.6+t*1.1;
-    events.forEach(function(ev,i){
-      if(t>ev.t){ v+=(1.25-i*0.09)*Math.min(1,(t-ev.t)/0.055); }
+  function show(anim){
+    bars.forEach(function(b,i){
+      if(anim){ b.r.style.transition="height 900ms cubic-bezier(.3,.7,.3,1) "+(i*40)+"ms, y 900ms cubic-bezier(.3,.7,.3,1) "+(i*40)+"ms"; b.t.style.transition="opacity 400ms "+(700+i*40)+"ms"; }
+      b.r.setAttribute("y",B-b.h); b.r.setAttribute("height",b.h); b.t.setAttribute("opacity",1);
     });
-    return Math.min(8.7,v+Math.sin(t*34)*0.13);
   }
-  function fsm(t){
-    var v=1.5+t*0.28;
-    events.forEach(function(ev){ if(t>ev.t) v+=0.12*Math.min(1,(t-ev.t)/0.05); });
-    return v+Math.sin(t*29+1.4)*0.11;
-  }
-
-  var pB=el("path",{d:build(fsm),class:"tracepath",style:"stroke:var(--baseline)"});
-  var pA=el("path",{d:build(util),class:"tracepath",style:"stroke:var(--signal)"});
-  g.appendChild(pB); g.appendChild(pA);
-
-  var endDot=el("circle",{cx:x(1),cy:y(util(1)),r:4,style:"fill:var(--signal)",opacity:0});
-  g.appendChild(endDot);
-
-  function reveal(){
-    [pA,pB].forEach(function(p){
-      var len=p.getTotalLength();
-      p.style.strokeDasharray=len; p.style.strokeDashoffset=len;
-      p.style.transition="stroke-dashoffset 2400ms cubic-bezier(.3,.7,.3,1)";
-      requestAnimationFrame(function(){ p.style.strokeDashoffset=0; });
-    });
-    marks.forEach(function(m){
-      setTimeout(function(){
-        m.ln.style.transition="opacity 420ms"; m.tx.style.transition="opacity 420ms";
-        m.ln.setAttribute("opacity",1); m.tx.setAttribute("opacity",1);
-      }, 220+m.t*2400);
-    });
-    setTimeout(function(){ endDot.style.transition="opacity 400ms"; endDot.setAttribute("opacity",1); },2500);
-  }
-  function show(){
-    marks.forEach(function(m){m.ln.setAttribute("opacity",1);m.tx.setAttribute("opacity",1);});
-    endDot.setAttribute("opacity",1);
-  }
-
-  if(reduce){ show(); return; }
-  var fired=false;
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting && !fired){ fired=true; reveal(); io.disconnect(); } });
-  },{threshold:.25});
+  if(reduce || !("IntersectionObserver" in window)){ show(false); return; }
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){show(true);io.disconnect();}});},{threshold:.3});
   io.observe(document.getElementById("trace"));
 })();
 </script>
