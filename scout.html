@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scout: Research agent | Utsav Jivani</title>
+<meta name="description" content="Scout, part of AI Engine by Utsav Jivani. A research agent whose every claim is checked against its source.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Martian+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">UTSAV JIVANI<span>.</span></a>
+    <div class="navlinks cs-nav">
+      <a href="scout.html" style="color:var(--ink);border-color:var(--signal)">Scout</a><a href="gearbox.html">Gearbox</a><a href="dyno.html">Dyno</a><a href="pitwall.html">Pitwall</a>
+    </div>
+    <button class="theme-btn" id="theme-btn" type="button">Dark</button>
+  </div>
+</nav>
+
+<header class="cs-head">
+  <div class="wrap">
+    <a class="crumb" href="index.html#projects">&larr; All projects</a>
+    <div class="eyebrow"><span class="dot"></span><span class="label">AI Engine · 01 of 04 · Research agent</span></div>
+    <h1>Scout</h1>
+    <p class="lede">A research agent whose every claim is checked against its source.</p>
+    <p class="summary">Language models answer research questions fluently, but they can invent facts and citations, and a confident wrong answer is worse than no answer. Real research also needs both the public web and a team's own private documents. Scout handles both, and fact-checks every sentence before you see it.</p>
+    <div class="specs four"><div><b>12/12</b><small>Document questions right</small></div><div><b>8/8</b><small>Unanswerable, handled honestly</small></div><div><b>£0.024</b><small>Per report</small></div><div><b>30 s</b><small>Median time</small></div></div>
+    <div class="meta" style="margin-top:22px">
+      <a href="https://github.com/Utsav0706/scout" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="cs-body">
+    <section>
+      <div class="shead"><h2>What it does</h2><div class="rule"></div><span class="label">01</span></div>
+      <p>You ask a question. Scout splits it into sub-questions, researches them in parallel on the web and in your uploaded PDFs, writes a short report, and fact-checks every sentence. Each claim carries a verdict badge and a Sources button showing the exact passage that supports it. When the evidence is not there, Scout says so instead of guessing.</p>
+    </section><section>
+      <div class="shead"><h2>How a report is made</h2><div class="rule"></div><span class="label">02</span></div>
+      <div class="flow"><div class="step"><span class="k">Plan</span><strong>Planner</strong><p>Splits the question into sub-questions.</p></div><div class="step"><span class="k">Research</span><strong>Parallel researchers</strong><p>Each sub-question is researched at the same time, through Scout's own MCP tool server.</p><div class="par"><span>Web search</span><span>Safe page fetch</span><span>Private PDF search</span><span>Note-taking</span></div></div><div class="step"><span class="k">Read</span><strong>Reader</strong><p>Takes source-tagged notes. Web pages are treated as data, never instructions.</p></div><div class="step"><span class="k">Write</span><strong>Writer</strong><p>May only use the notes, so every sentence traces back to a source.</p></div><div class="step"><span class="k">Verify</span><strong>Verifier</strong><p>Must quote the exact source sentence it relied on. Code then confirms the quote really appears in the source.</p></div><div class="step loopback"><span class="k">Revise</span><strong>Reviser</strong><p>One bounded retry round for claims that failed verification.</p></div></div>
+    </section><section>
+      <div class="shead"><h2>Key decisions</h2><div class="rule"></div><span class="label">03</span></div>
+      <ul>
+<li><b>Citations checked by code, not by the model.</b> A model cannot simply claim support: the quote has to exist in the source text.</li>
+<li><b>Cost-aware model split.</b> Claude Sonnet plans, writes and revises; the cheaper Claude Haiku does the many reading and checking calls.</li>
+<li><b>Hybrid document search.</b> Local embeddings plus PostgreSQL full-text search, merged with reciprocal rank fusion and reranked by a cross-encoder. Private files never leave the server for indexing.</li>
+<li><b>Hard budgets.</b> Every report is capped at £0.20, 50 model calls and 180 seconds, and returns a partial report with the reason if a limit is hit.</li>
+<li><b>Safety by design.</b> Injection scanning, hidden-text stripping, a link allowlist and SSRF protection, with personal data redacted from logs and traces.</li>
+<li><b>A full product.</b> REST API with login, background jobs on Redis, live progress streamed to the browser, report history, feedback and a usage dashboard.</li>
+</ul>
+    </section><section>
+      <div class="shead"><h2>Results</h2><div class="rule"></div><span class="label">04</span></div>
+      <p>Measured on a 50-question golden set.</p><div class="tablewrap"><table class="res"><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody><tr><td>Questions about uploaded documents answered correctly</td><td class="n">12 / 12</td></tr><tr><td>Unanswerable questions handled honestly</td><td class="n">8 / 8</td></tr><tr><td>Correct choice of tools</td><td class="n">50 / 50</td></tr><tr><td>Overall task success (strict: every key point needed)</td><td class="n">68% at baseline</td></tr><tr><td>Cost and time per report</td><td class="n">£0.024, 30 s median</td></tr><tr><td>Hardest questions after the Dyno-found fix (3 attempts each)</td><td class="n">47% → 80%</td></tr><tr><td>Cost per report when routed through Gearbox</td><td class="n">−50%, 34% faster</td></tr><tr><td>Live red-team: planted instructions the real model obeyed</td><td class="n">0 of 4 (all flagged)</td></tr></tbody></table></div>
+    </section><section>
+      <div class="shead"><h2>What didn't work at first</h2><div class="rule"></div><span class="label">05</span></div>
+      <div class="callout"><p>Strict task success started at 68%. <a href="dyno.html">Dyno</a>'s failure clustering showed why: reports were stopping at "the sources don't say" instead of searching further. Fixing that lifted success on the hardest questions from 47% to 80%, and no case got worse.</p></div>
+    </section>
+    <section>
+      <div class="shead"><h2>Built with</h2><div class="rule"></div></div>
+      <div class="tags"><b>Python</b><b>FastAPI</b><b>LangGraph</b><b>Claude Sonnet & Haiku</b><b>MCP</b><b>PostgreSQL + pgvector</b><b>sentence-transformers</b><b>Redis + RQ</b><b>SQLAlchemy + Alembic</b><b>OpenTelemetry</b><b>Langfuse</b><b>Streamlit</b><b>Docker Compose</b><b>GitHub Actions</b></div>
+    </section>
+    <div class="next">
+      <a href="pitwall.html">&larr; Pitwall</a>
+      <a href="gearbox.html">Gearbox &rarr;</a>
+    </div>
+  </div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span class="label">Contact</span>
+    <h2>Want to talk about Scout?</h2>
+    <p>I'm based in London and looking for a software or AI engineering role. Happy to walk through the code.</p>
+    <div class="meta">
+      <a href="mailto:utsavjivani.07@gmail.com">utsavjivani.07@gmail.com</a>
+      <a href="https://github.com/Utsav0706" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/utsavjivani07" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+    <div class="colophon"><span class="label">© 2026 Utsav Jivani</span><a class="label" href="index.html" style="text-decoration:none">Back to home</a></div>
+  </div>
+</footer>
+<script src="theme.js"></script>
+</body>
+</html>
