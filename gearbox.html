@@ -42,19 +42,33 @@
       <div class="shead"><h2>What it does</h2><div class="rule"></div><span class="label">01</span></div>
       <p>Apps call Gearbox exactly as they would call OpenAI or Anthropic. For each request it predicts the cheapest model tier that will still answer well (a free local model, Claude Haiku or Claude Sonnet), calls it, handles failures, and explains its decision in the response headers.</p>
     </section><section>
-      <div class="shead"><h2>The request path</h2><div class="rule"></div><span class="label">02</span></div>
+      <div class="shead"><h2>Gearbox in use</h2><div class="rule"></div><span class="label">02</span></div>
+      <figure class="shot">
+  <video autoplay muted loop playsinline preload="metadata" poster="assets/gearbox/try-it-poster.webp" aria-label="Sending a prompt through Gearbox's Try it page">
+    <source src="assets/gearbox/try-it.mp4" type="video/mp4">
+  </video>
+  <figcaption>The Try it page sends a prompt through the Gearbox API exactly as any app would. In auto mode the router picks the tier.</figcaption>
+</figure><figure class="shot">
+  <img src="assets/gearbox/overview.webp" width="1440" height="900" loading="lazy" alt="Gearbox overview dashboard showing 346 requests, £0.1356 spend and most requests routed to the mid tier">
+  <figcaption>The overview dashboard: requests, spend, cache hits, fallbacks, escalations and errors, with spend over time and requests per tier. Most traffic goes to the mid tier (M), as the evaluation predicted.</figcaption>
+</figure><figure class="shot">
+  <img src="assets/gearbox/try-it-result.webp" width="1440" height="900" loading="lazy" alt="Gearbox Try it page with model tier options and the answer to a prompt">
+  <figcaption>Choose auto or force a tier, cap the maximum tier, and switch on quality mode to escalate answers that look wrong.</figcaption>
+</figure>
+    </section><section>
+      <div class="shead"><h2>The request path</h2><div class="rule"></div><span class="label">03</span></div>
       <div class="flow"><div class="step"><span class="k">In</span><strong>Drop-in API</strong><p>OpenAI-style /v1/chat/completions and Anthropic-style /v1/messages. Existing apps change one base URL.</p></div><div class="step"><span class="k">Check</span><strong>Cache and policy</strong><p>Response cache, a monthly budget and a max-tier policy.</p></div><div class="step"><span class="k">Decide</span><strong>Router</strong><p>Embeddings + logistic regression predicts the cheapest tier that will answer well.</p><div class="par"><span>Local · Llama 3.2 3B</span><span>Claude Haiku</span><span>Claude Sonnet</span></div></div><div class="step"><span class="k">Call</span><strong>Model call with fallback</strong><p>Retries fall back to another tier. Optional quality mode checks the answer and escalates if the check fails.</p></div><div class="step"><span class="k">Log</span><strong>Visibility</strong><p>Every request logged with tier, cost, latency and reason, traced to Langfuse and shown on a dashboard.</p></div></div>
     </section><section>
-      <div class="shead"><h2>How the router was chosen</h2><div class="rule"></div><span class="label">03</span></div>
+      <div class="shead"><h2>How the router was chosen</h2><div class="rule"></div><span class="label">04</span></div>
       <p>I built a labelled dataset of 600 prompts, each answered by all three tiers and scored by a judge, giving the cheapest tier that answered well. Four routers were then compared on 119 held-out prompts, against always using Claude Sonnet.</p><div class="tablewrap"><table class="res"><thead><tr><th>Strategy</th><th>Quality</th><th>Cost saved</th><th>Routing time</th></tr></thead><tbody><tr><td>Always the large model (Sonnet)</td><td class="n">100%</td><td class="n">0%</td><td class="n">–</td></tr><tr><td>Keyword rules</td><td class="n">68.0%</td><td class="n">97.5%</td><td class="n">&lt; 1 ms</td></tr><tr><td>LLM classifier (Haiku)</td><td class="n">90.6%</td><td class="n">80.5%</td><td class="n">1,952 ms</td></tr><tr class="pick"><td>Embeddings + logistic regression (chosen)</td><td class="n">94.7%</td><td class="n">92.9%</td><td class="n">36 ms</td></tr><tr><td>Oracle (perfect labels)</td><td class="n">98.4%</td><td class="n">86.8%</td><td class="n">–</td></tr></tbody></table></div><p style="margin-top:14px">95% confidence intervals: 91–94% saved, 90–99% quality. A live run through the API confirmed it (94.5% quality, 92.5% saved).</p>
     </section><section>
-      <div class="shead"><h2>In production</h2><div class="rule"></div><span class="label">04</span></div>
+      <div class="shead"><h2>In production</h2><div class="rule"></div><span class="label">05</span></div>
       <ul>
 <li><b>Scout through Gearbox:</b> one line of config, no code changes. 50% cheaper and 34% faster per report, with the same key points answered.</li>
 <li><b>Canary releases:</b> new routers, including <a href="pitwall.html">Pitwall</a>'s fine-tuned model, get a share of real traffic first, with safe fallback if they fail.</li>
 </ul>
     </section><section>
-      <div class="shead"><h2>An honest finding</h2><div class="rule"></div><span class="label">05</span></div>
+      <div class="shead"><h2>An honest finding</h2><div class="rule"></div><span class="label">06</span></div>
       <div class="callout"><p>On this data, the mid-size model is good enough so often that the best router mostly picks it. Which prompts truly need the large model is hard to predict from the prompt alone. <a href="pitwall.html">Pitwall</a> later confirmed this independently.</p></div>
     </section>
     <section>

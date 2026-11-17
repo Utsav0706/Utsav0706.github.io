@@ -42,10 +42,21 @@
       <div class="shead"><h2>The lifecycle</h2><div class="rule"></div><span class="label">01</span></div>
       <div class="flow"><div class="step"><span class="k">Data</span><strong>Versioned data (DVC)</strong><p>Gearbox's labelled prompts imported from a pinned commit; every input and output hashed, and CI rebuilds the data to prove it.</p></div><div class="step"><span class="k">Train</span><strong>LoRA fine-tuning</strong><p>Qwen3-0.6B fine-tuned on a free Colab T4 GPU, exported to a 4-bit GGUF model that runs on a normal CPU through Ollama.</p></div><div class="step"><span class="k">Track</span><strong>MLflow registry</strong><p>Every run tagged with its data version, prompt-template hash and git commit. Models are promoted by moving an alias.</p></div><div class="step"><span class="k">Gate</span><strong>Release rules as code</strong><p>Promote only if the candidate passes the Dyno gate, under-routes no more than production and keeps p95 latency under 600 ms.</p><div class="par"><span>No accuracy drop (Dyno)</span><span>No extra under-routing</span><span>p95 &lt; 600 ms</span></div></div><div class="step"><span class="k">Serve</span><strong>Routing service + canary</strong><p>FastAPI POST /route with hot-swappable versions. A share of Gearbox traffic tries the candidate; if Pitwall is down, Gearbox falls back safely.</p></div><div class="step"><span class="k">Watch</span><strong>Monitoring and drift</strong><p>Prometheus metrics, a Grafana dashboard as code and Evidently drift reports with alerts.</p></div><div class="step loopback"><span class="k">Retrain</span><strong>Closed loop</strong><p>User feedback and failures become Dyno test cases, and drift triggers retraining on the new data.</p></div></div>
     </section><section>
-      <div class="shead"><h2>Results</h2><div class="rule"></div><span class="label">02</span></div>
+      <div class="shead"><h2>Pitwall in production</h2><div class="rule"></div><span class="label">02</span></div>
+      <figure class="shot">
+  <video autoplay muted loop playsinline preload="metadata" poster="assets/pitwall/grafana-live-poster.webp" aria-label="Pitwall's Grafana dashboard updating live">
+    <source src="assets/pitwall/grafana-live.mp4" type="video/mp4">
+  </video>
+  <figcaption>The Grafana dashboard live with traffic flowing through it: production version, requests per second, routing latency, tier mix and fail-safe share, refreshing every 5 seconds.</figcaption>
+</figure><figure class="shot">
+  <img src="assets/pitwall/grafana.webp" width="1600" height="1000" loading="lazy" alt="Pitwall Grafana dashboard showing version v1, 1.75 requests per second, 536 ms routing p95 and 0% fail-safe share">
+  <figcaption>The same dashboard as code. The red line on routing latency is the 600 ms p95 release limit; during this traffic burst p95 rose to around that limit, which is exactly what the panel is there to catch.</figcaption>
+</figure>
+    </section><section>
+      <div class="shead"><h2>Results</h2><div class="rule"></div><span class="label">03</span></div>
       <div class="tablewrap"><table class="res"><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody><tr><td>Fine-tuning time and memory (free Colab T4)</td><td class="n">145 s, 3.7 GB peak</td></tr><tr><td>Served model size</td><td class="n">~400 MB (4-bit GGUF), CPU only</td></tr><tr><td>Routing latency on CPU</td><td class="n">108 ms median, 488 ms p95</td></tr><tr><td>Cost per routing decision</td><td class="n">~£0, replacing a paid LLM classifier</td></tr><tr><td>Release gate and canary</td><td class="n">Promotion, rollback and a 10% canary verified live through Gearbox</td></tr></tbody></table></div>
     </section><section>
-      <div class="shead"><h2>An honest finding</h2><div class="rule"></div><span class="label">03</span></div>
+      <div class="shead"><h2>An honest finding</h2><div class="rule"></div><span class="label">04</span></div>
       <div class="callout"><p>The fine-tuned model matched the strongest simple rule but did not beat it. That independently confirmed <a href="gearbox.html">Gearbox</a>'s result: which prompts need the large model is hard to predict from the prompt alone. The value of Pitwall is the pipeline, which now makes any future model safe to ship and easy to roll back.</p></div>
     </section>
     <section>

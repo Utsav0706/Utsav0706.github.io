@@ -233,3 +233,12 @@ table.res tr.pick td{background:var(--chip);font-weight:600}
 .next{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:64px;padding-top:22px;border-top:1.5px solid var(--ink)}
 .next a{font-family:var(--display);font-weight:700;text-decoration:none;font-size:1.05rem;border-bottom:1.5px solid var(--line)}
 .next a:hover{border-color:var(--signal)}
+
+/* screenshots */
+.shot{margin:0 0 22px;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--ink)}
+.shot img,.shot video{display:block;width:100%;height:auto;border-bottom:1px solid var(--line);background:#fff}
+.shot figcaption{padding:11px 14px 13px;font-size:14px;color:var(--muted)}
+.shotgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.shotgrid .shot{margin:0}
+.shotgrid .shot:first-child{grid-column:1/-1}
+@media(max-width:640px){.shotgrid{grid-template-columns:1fr}}
