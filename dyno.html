@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dyno: Evaluation harness | Utsav Jivani</title>
+<meta name="description" content="Dyno, part of AI Engine by Utsav Jivani. Measures AI agents step by step, and blocks changes that make them worse.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Martian+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">UTSAV JIVANI<span>.</span></a>
+    <div class="navlinks cs-nav">
+      <a href="scout.html">Scout</a><a href="gearbox.html">Gearbox</a><a href="dyno.html" style="color:var(--ink);border-color:var(--signal)">Dyno</a><a href="pitwall.html">Pitwall</a>
+    </div>
+    <button class="theme-btn" id="theme-btn" type="button">Dark</button>
+  </div>
+</nav>
+
+<header class="cs-head">
+  <div class="wrap">
+    <a class="crumb" href="index.html#projects">&larr; All projects</a>
+    <div class="eyebrow"><span class="dot"></span><span class="label">AI Engine · 03 of 04 · Evaluation harness</span></div>
+    <h1>Dyno</h1>
+    <p class="lede">Measures AI agents step by step, and blocks changes that make them worse.</p>
+    <p class="summary">AI agents are non-deterministic: the same question can pass once and fail the next time. Unit tests with scripted models cannot see behaviour changes, and judging only the final answer hides wasted steps, wrong tool use and invented facts. Dyno is built to see all of that.</p>
+    <div class="specs four"><div><b>47→80%</b><small>Agent success after fix</small></div><div><b>κ 1.00</b><small>Best judge agreement</small></div><div><b>80→40%</b><small>Regression it blocked</small></div><div><b>pass^k</b><small>Reliability, not luck</small></div></div>
+    <div class="meta" style="margin-top:22px">
+      <a href="https://github.com/Utsav0706/dyno" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="cs-body">
+    <section>
+      <div class="shead"><h2>What it does</h2><div class="rule"></div><span class="label">01</span></div>
+      <p>Dyno runs any agent on a suite of test cases several times each, records every step (model calls, tool calls, results), scores each attempt, compares runs, groups failures into clusters, and fails a pull request when the agent gets worse.</p>
+    </section><section>
+      <div class="shead"><h2>How an evaluation runs</h2><div class="rule"></div><span class="label">02</span></div>
+      <div class="flow"><div class="step"><span class="k">Define</span><strong>Test cases in YAML</strong><p>Expected key points, tools that must or must not be called, step limits and tags. Agents plug in in-process or over HTTP.</p></div><div class="step"><span class="k">Run</span><strong>Repeated attempts</strong><p>Each case runs several times, with every step recorded.</p></div><div class="step"><span class="k">Score</span><strong>Scorers</strong><p>Deterministic checks plus LLM judges.</p><div class="par"><span>Tool use, steps, cost</span><span>Task success judge</span><span>Hallucination judge</span><span>Quality judge</span></div></div><div class="step"><span class="k">Analyse</span><strong>Compare and cluster</strong><p>pass@k and pass^k, flaky cases, run-to-run comparison, failure clustering with embeddings and k-means.</p></div><div class="step"><span class="k">Gate</span><strong>CI regression gate</strong><p>A reusable GitHub Action runs the agent on the PR and the base branch, and blocks the merge if quality drops.</p></div></div>
+    </section><section>
+      <div class="shead"><h2>Can the judges be trusted?</h2><div class="rule"></div><span class="label">03</span></div>
+      <p>Before any judge was used, I labelled answers by hand, blind to the judges, and measured agreement as Cohen's kappa.</p><div class="tablewrap"><table class="res"><thead><tr><th>Judge</th><th>Agreement with human labels</th></tr></thead><tbody><tr><td>Task rubric</td><td class="n">κ = 1.00</td></tr><tr><td>Quality</td><td class="n">κ = 0.95</td></tr><tr><td>Hallucination</td><td class="n">κ = 0.63</td></tr></tbody></table></div><p style="margin-top:14px">The hallucination judge is the weakest of the three, so its scores are read with more caution.</p>
+    </section><section>
+      <div class="shead"><h2>What it found</h2><div class="rule"></div><span class="label">04</span></div>
+      <div class="tablewrap"><table class="res"><thead><tr><th>Finding</th><th>Evidence</th></tr></thead><tbody><tr><td>Found Scout's biggest weakness and measured the fix</td><td class="n">Reports stopped at "the sources don't say" instead of searching further. After the fix: task success 47% → 80%, cases right every time 4/10 → 7/10, none got worse</td></tr><tr><td>Blocked a bad change that passed every unit test</td><td class="n">A "cost cut" PR dropped task success from 80% to 40%, and actually cost 26% more per question</td></tr><tr><td>Showed that one run is not enough</td><td class="n">Same code: pass@3 60% but pass^3 40%; one run scored 70%, another 47%</td></tr></tbody></table></div>
+    </section><section>
+      <div class="shead"><h2>Why this matters</h2><div class="rule"></div><span class="label">05</span></div>
+      <div class="callout"><p>The same code scored 70% on one run and 47% on another. Without repeated runs and pass^k, a team would ship or reject changes based on noise.</p></div>
+    </section>
+    <section>
+      <div class="shead"><h2>Built with</h2><div class="rule"></div></div>
+      <div class="tags"><b>Python</b><b>Typer CLI</b><b>Pydantic</b><b>SQLAlchemy + Alembic</b><b>SQLite</b><b>Claude Haiku judges</b><b>sentence-transformers</b><b>scikit-learn</b><b>Streamlit</b><b>GitHub Actions</b></div>
+    </section>
+    <div class="next">
+      <a href="gearbox.html">&larr; Gearbox</a>
+      <a href="pitwall.html">Pitwall &rarr;</a>
+    </div>
+  </div>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span class="label">Contact</span>
+    <h2>Want to talk about Dyno?</h2>
+    <p>I'm based in London and looking for a software or AI engineering role. Happy to walk through the code.</p>
+    <div class="meta">
+      <a href="mailto:utsavjivani.07@gmail.com">utsavjivani.07@gmail.com</a>
+      <a href="https://github.com/Utsav0706" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/utsavjivani07" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+    <div class="colophon"><span class="label">© 2026 Utsav Jivani</span><a class="label" href="index.html" style="text-decoration:none">Back to home</a></div>
+  </div>
+</footer>
+<script src="theme.js"></script>
+</body>
+</html>
