@@ -42,10 +42,36 @@
       <div class="shead"><h2>What it does</h2><div class="rule"></div><span class="label">01</span></div>
       <p>You ask a question. Scout splits it into sub-questions, researches them in parallel on the web and in your uploaded PDFs, writes a short report, and fact-checks every sentence. Each claim carries a verdict badge and a Sources button showing the exact passage that supports it. When the evidence is not there, Scout says so instead of guessing.</p>
     </section><section>
-      <div class="shead"><h2>How a report is made</h2><div class="rule"></div><span class="label">02</span></div>
+      <div class="shead"><h2>Scout in use</h2><div class="rule"></div><span class="label">02</span></div>
+      <figure class="shot">
+  <video autoplay muted loop playsinline preload="metadata" poster="assets/scout/live-progress-poster.webp" aria-label="Scout streaming live progress while it researches a question">
+    <source src="assets/scout/live-progress.mp4" type="video/mp4">
+  </video>
+  <figcaption>Asking a question. Progress streams live to the browser while Scout plans, researches and verifies.</figcaption>
+</figure>
+<figure class="shot">
+  <img src="assets/scout/sources.webp" width="1440" height="900" loading="lazy" alt="A Scout report with a Sources popup showing the GOV.UK passage that supports the claim, checked word for word">
+  <figcaption>Every claim has a Sources button. It shows the exact passage that supports it, checked word for word by code.</figcaption>
+</figure>
+<div class="shotgrid">
+  <figure class="shot">
+    <img src="assets/scout/report.webp" width="1440" height="900" loading="lazy" alt="End of a Scout report with verified claims, limitations, sources, run cost and a feedback form">
+    <figcaption>The end of a report: verified claims, limitations, cost, time, model calls and a trace ID.</figcaption>
+  </figure>
+  <figure class="shot">
+    <img src="assets/scout/history.webp" width="1440" height="900" loading="lazy" alt="Scout report history listing past questions with status and cost">
+    <figcaption>Report history with status and cost for each question.</figcaption>
+  </figure>
+  <figure class="shot">
+    <img src="assets/scout/usage.webp" width="1440" height="900" loading="lazy" alt="Scout usage dashboard showing reports, average cost, average time and feedback">
+    <figcaption>Usage dashboard: reports, average cost and time, failures and feedback.</figcaption>
+  </figure>
+</div>
+    </section><section>
+      <div class="shead"><h2>How a report is made</h2><div class="rule"></div><span class="label">03</span></div>
       <div class="flow"><div class="step"><span class="k">Plan</span><strong>Planner</strong><p>Splits the question into sub-questions.</p></div><div class="step"><span class="k">Research</span><strong>Parallel researchers</strong><p>Each sub-question is researched at the same time, through Scout's own MCP tool server.</p><div class="par"><span>Web search</span><span>Safe page fetch</span><span>Private PDF search</span><span>Note-taking</span></div></div><div class="step"><span class="k">Read</span><strong>Reader</strong><p>Takes source-tagged notes. Web pages are treated as data, never instructions.</p></div><div class="step"><span class="k">Write</span><strong>Writer</strong><p>May only use the notes, so every sentence traces back to a source.</p></div><div class="step"><span class="k">Verify</span><strong>Verifier</strong><p>Must quote the exact source sentence it relied on. Code then confirms the quote really appears in the source.</p></div><div class="step loopback"><span class="k">Revise</span><strong>Reviser</strong><p>One bounded retry round for claims that failed verification.</p></div></div>
     </section><section>
-      <div class="shead"><h2>Key decisions</h2><div class="rule"></div><span class="label">03</span></div>
+      <div class="shead"><h2>Key decisions</h2><div class="rule"></div><span class="label">04</span></div>
       <ul>
 <li><b>Citations checked by code, not by the model.</b> A model cannot simply claim support: the quote has to exist in the source text.</li>
 <li><b>Cost-aware model split.</b> Claude Sonnet plans, writes and revises; the cheaper Claude Haiku does the many reading and checking calls.</li>
@@ -55,10 +81,10 @@
 <li><b>A full product.</b> REST API with login, background jobs on Redis, live progress streamed to the browser, report history, feedback and a usage dashboard.</li>
 </ul>
     </section><section>
-      <div class="shead"><h2>Results</h2><div class="rule"></div><span class="label">04</span></div>
+      <div class="shead"><h2>Results</h2><div class="rule"></div><span class="label">05</span></div>
       <p>Measured on a 50-question golden set.</p><div class="tablewrap"><table class="res"><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody><tr><td>Questions about uploaded documents answered correctly</td><td class="n">12 / 12</td></tr><tr><td>Unanswerable questions handled honestly</td><td class="n">8 / 8</td></tr><tr><td>Correct choice of tools</td><td class="n">50 / 50</td></tr><tr><td>Overall task success (strict: every key point needed)</td><td class="n">68% at baseline</td></tr><tr><td>Cost and time per report</td><td class="n">£0.024, 30 s median</td></tr><tr><td>Hardest questions after the Dyno-found fix (3 attempts each)</td><td class="n">47% → 80%</td></tr><tr><td>Cost per report when routed through Gearbox</td><td class="n">−50%, 34% faster</td></tr><tr><td>Live red-team: planted instructions the real model obeyed</td><td class="n">0 of 4 (all flagged)</td></tr></tbody></table></div>
     </section><section>
-      <div class="shead"><h2>What didn't work at first</h2><div class="rule"></div><span class="label">05</span></div>
+      <div class="shead"><h2>What didn't work at first</h2><div class="rule"></div><span class="label">06</span></div>
       <div class="callout"><p>Strict task success started at 68%. <a href="dyno.html">Dyno</a>'s failure clustering showed why: reports were stopping at "the sources don't say" instead of searching further. Fixing that lifted success on the hardest questions from 47% to 80%, and no case got worse.</p></div>
     </section>
     <section>
