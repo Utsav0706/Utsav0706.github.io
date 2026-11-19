@@ -34,7 +34,7 @@
     <div>
     <h1>Utsav<br>Jivani</h1>
     <p class="lede">Software engineer building <b>AI systems in Python</b> that are tested, measured and honest about their results, with a background in <b>Unity&nbsp;6</b> and <b>C#</b>.</p>
-    <p class="summary">I built AI Engine, four connected systems covering a fact-checked research agent, an LLM router that cuts model costs by 93%, an agent evaluation harness and an LLMOps platform, with about 625 automated tests between them. Before that I spent six months as a Unity / C# game development intern, and my MSc dissertation benchmarked Utility AI against a finite state machine across 390 agent-runs.</p>
+    <p class="summary">I built AI Engine, four connected systems covering a fact-checked research agent, an LLM router that cuts model costs by 93%, an agent evaluation harness and an LLMOps platform, with over 800 automated tests between them and one command that runs all four as a single system. Before that I spent six months as a Unity / C# game development intern, and my MSc dissertation benchmarked Utility AI against a finite state machine across 390 agent-runs.</p>
     </div>
       <figure class="loop" aria-label="Diagram of the AI Engine loop">
         <div class="loop-head"><span class="label">AI Engine · the loop</span><span class="label">Click a system</span></div>
@@ -102,12 +102,12 @@
         <span class="label">Python · 2026</span>
       </div>
       <p class="role">Four connected systems for building, routing, testing and operating AI applications</p>
-      <p>Each project stands on its own, and each feeds the next. Scout's model calls go through Gearbox. Dyno measures both and gates their pull requests. Pitwall trains a small model on Gearbox's labelled prompts, uses Dyno as its release gate and serves the model back to Gearbox behind a canary.</p>
+      <p>Each project stands on its own, and each feeds the next. Scout's model calls can go through Gearbox with one line of config. Dyno measures both and gates their pull requests. Pitwall trains a small model on Gearbox's labelled prompts, uses Dyno as its release gate and serves the model back to Gearbox behind a canary. The whole system was built and evaluated for about £10 of API spend.</p>
       <div class="specs four">
         <div><b>93%</b><small>Lower LLM cost at 95% quality</small></div>
         <div><b>47&rarr;80%</b><small>Agent task success after fix</small></div>
         <div><b>£0.024</b><small>Per fact-checked report</small></div>
-        <div><b>~625</b><small>Automated tests, CI on push</small></div>
+        <div><b>800+</b><small>Automated tests, CI on push</small></div>
       </div>
       <div class="systems">
         <div>
@@ -137,6 +137,12 @@
           <p>Versions data with DVC, fine-tunes Qwen3-0.6B with LoRA, tracks runs in MLflow, gates releases, serves a 4-bit model through FastAPI and watches for drift with Prometheus, Grafana and Evidently.</p>
           <p class="stat">108 ms median on CPU · ~400 MB model</p>
           <a class="more" href="pitwall.html">Read the case study →</a>
+        </div>
+        <div class="wide">
+          <span class="label">05 · Integration</span>
+          <h4><a href="https://github.com/Utsav0706/uv-ai-stack" target="_blank" rel="noopener">uv-ai-stack</a></h4>
+          <p>Runs the four as one system. One command starts and stops all six services (MLflow, Pitwall, Gearbox, Scout, Prometheus, Grafana) in dependency order, at pinned versions tested together. CI builds them in Docker Compose and checks every connection, and a second command runs the whole loop end to end: traffic through Gearbox and Pitwall, a drift check, and Dyno's release gate.</p>
+          <p class="stat">6 services · 1 command · every connection checked in CI</p>
         </div>
       </div>
       <div class="tags"><b>Python</b><b>FastAPI</b><b>LangGraph</b><b>MCP</b><b>RAG</b><b>PostgreSQL</b><b>Redis</b><b>MLflow</b><b>Docker</b><b>GitHub Actions</b></div>

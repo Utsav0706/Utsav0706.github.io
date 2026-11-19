@@ -242,3 +242,4 @@ table.res tr.pick td{background:var(--chip);font-weight:600}
 .shotgrid .shot{margin:0}
 .shotgrid .shot:first-child{grid-column:1/-1}
 @media(max-width:640px){.shotgrid{grid-template-columns:1fr}}
+.systems .wide{grid-column:1/-1}
